@@ -1,0 +1,4 @@
+/* IOSTREAM TEST*/
+
+print 45;
+println 42;

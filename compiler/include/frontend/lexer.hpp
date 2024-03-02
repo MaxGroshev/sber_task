@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <memory>
+#include <iomanip>
 #include <fstream>
 #include "grammar.tab.hpp"
 
@@ -18,33 +19,13 @@
 class my_lexer_t : public yyFlexLexer {
     std::string cur_lex_type;
     std::string cur_lex_val;
+    std::string token_extra_dat;
     yy::parser::location_type yylloc;
 
 
-    int make_plus() {
-        cur_lex_type = "operator";
-        std::cout << YYText();
-        return yy::parser::token_type::PLUS;
-    }
-
-    int make_minus() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::MINUS;
-    }
-
-    int make_mul() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::MUL;
-    }
-
-    int make_div() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::DIV;
-    }
-
-    int make_modulo() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::MODULO;
+    int make_arith(int lex_val) {
+        cur_lex_type = "arith_operator";
+        return lex_val;
     }
 
     int make_scolon() {
@@ -52,38 +33,13 @@ class my_lexer_t : public yyFlexLexer {
         return yy::parser::token_type::SCOLON;
     }
 
-    int make_equal() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::EQUAL;
-    }
-
-    int make_not_equal() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::NOT_EQUAL;
-    }
-
-    int make_ls_equal() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::LS_EQUAL;
-    }
-
-    int make_gr_equal() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::GR_EQUAL;
-    }
-
-    int make_less() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::LESS;
-    }
-
-    int make_greater() {
-        cur_lex_type = "operator";
-        return yy::parser::token_type::GREATER;
+    int make_compare(int lex_val) {
+        cur_lex_type = "compare operator";
+        return lex_val;
     }
 
     int make_assign() {
-        cur_lex_type = "operator";
+        cur_lex_type = "assign operator";
 
         return yy::parser::token_type::ASSIGN;
     }
@@ -133,8 +89,9 @@ class my_lexer_t : public yyFlexLexer {
         return yy::parser::token_type::CL_BR;
     }
 
-    int make_err() {
+    int make_err(const char* error) {
         cur_lex_type = "ERROR";
+        token_extra_dat = error;
         return yy::parser::token_type::ERR;
     }
 
@@ -144,7 +101,7 @@ class my_lexer_t : public yyFlexLexer {
     }
 
     int make_id() {
-        cur_lex_type = "name";
+        cur_lex_type = "ID";
         return yy::parser::token_type::ID;
     }
 
@@ -163,14 +120,9 @@ class my_lexer_t : public yyFlexLexer {
         return yy::parser::token_type::NEGATIVE;
     }
 
-    int make_true() {
+    int make_logic_val(int lex_val) {
         cur_lex_type = "logic_val";
-        return yy::parser::token_type::TRUE;
-    }
-
-    int make_false() {
-        cur_lex_type = "logic_val";
-        return yy::parser::token_type::FALSE;
+        return lex_val;
     }
 
     int make_then() {
@@ -192,11 +144,16 @@ class my_lexer_t : public yyFlexLexer {
         cur_lex_type = "type_indificator";
         return lex_val;
     }
+    int make_string() {
+        cur_lex_type = "string";
+        return yy::parser::token_type::STRING;
+    }
 
     public:
         virtual int yylex(yy::parser::location_type* loc);
         yy::parser::location_type get_location() const {return yylloc;};
         std::string get_cur_lex_type() const {return cur_lex_type;};
+        std::string get_token_extra_dat() const {return token_extra_dat;};
         void set_location(yy::parser::location_type* loc) {
             if (loc)
                 yylloc = *loc;

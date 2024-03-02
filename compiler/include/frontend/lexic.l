@@ -33,14 +33,16 @@ PRINT [p|P][r|R][i|I][n|N][t|T]
 PRINTLN [p|P][r|R][i|I][n|N][t|T][l|L][n|N]
 THEN  [t|T][h|H][e|E][n|N]
 ID    [a-zA-Z][a-zA-Z_0-9]*
-TRUE  [t][r|R][u|u][e|E]
+TRUE  [t][r|R][u|U][e|E]
 FALSE [f][a|A][l|L][s|S][e|E]
 
-ONE_LINE_COMMENT "//".*
+ONE_LINE_COMMENT "--".*
 
 /*---------------------------------------------------------------------------*/
 
 %x COMMENT
+%x STRING_MATCH
+
 %%
     int com_level = 0;
 
@@ -59,32 +61,55 @@ ONE_LINE_COMMENT "//".*
     "*"+          {};
     [/]           {};
     [^/*\n]+      {};
+    \0            {make_err("ASCII 0 in comment"); BEGIN(INITIAL); return 1;}
+    <<EOF>>       {make_err("EOF in comment");     BEGIN(INITIAL); return 1;}
+    {LINE}        {loc->lines(yyleng); loc->step();};
+}
+
+
+["]              {BEGIN(STRING_MATCH);}
+<STRING_MATCH>{
+    ["]           {BEGIN(INITIAL);}
+
+    [^"\n]+       {return make_string();};
+    \0            {make_err("ASCII 0 in string"); BEGIN(INITIAL); return 1;}
+    <<EOF>>       {make_err("EOF in string");     BEGIN(INITIAL); return 1;}
     {LINE}        {loc->lines(yyleng); loc->step();};
 }
 
 %{/*-----------------------------------------------------------------------*/%}
 
-{TABUL}           {loc->columns(4);    loc->step();};
-{WS}              {loc->columns(1);    loc->step();};
-{LINE}            {loc->lines(yyleng); loc->step();};
-{ONE_LINE_COMMENT} {}
+{TABUL}            {loc->columns(4);    loc->step();};
+{WS}               {loc->columns(1);    loc->step();};
+{LINE}             {loc->lines(yyleng); loc->step();};
 {I_LOVE_WINDOWS}   {};
+{ONE_LINE_COMMENT} {}
 
 %{/*-----------------------------------------------------------------------*/%}
 
-"+"               {return make_plus();};
-"-"               {return make_minus();};
-"*"               {return make_mul();};
-"/"               {return make_div();};
-"%"               {return make_modulo();};
-";"               {return make_scolon();};
-"=="              {return make_equal();};
-"<="              {return make_ls_equal();};
-">="              {return make_gr_equal();};
-"!="              {return make_not_equal();};
-">"               {return make_greater();};
-"<"               {return make_less();};
+"+"               {return make_arith(yy::parser::token_type::PLUS);};
+"-"               {return make_arith(yy::parser::token_type::MINUS);};
+"*"               {return make_arith(yy::parser::token_type::MUL);};
+"/"               {return make_arith(yy::parser::token_type::DIV);};
+"%"               {return make_arith(yy::parser::token_type::MODULO);};
+"=="              {return make_compare(yy::parser::token_type::EQUAL);};
+"<="              {return make_compare(yy::parser::token_type::LS_EQUAL);};
+">="              {return make_compare(yy::parser::token_type::GR_EQUAL);};
+"!="              {return make_compare(yy::parser::token_type::NOT_EQUAL);};
+">"               {return make_compare(yy::parser::token_type::GREATER);};
+"<"               {return make_compare(yy::parser::token_type::LESS);};
 "="               {return make_assign();};
+";"               {return make_scolon();};
+"!"               {return make_negative();};
+"?"               {return make_input();};
+"("               {return make_op_pr();};
+")"               {return make_cl_pr();};
+"{"               {return make_op_br();};
+"}"               {return make_cl_br();};
+"||"              {return make_or();};
+"&&"              {return make_and();};
+
+
 {IF}              {return make_if();};
 {WHILE}           {return make_while();};
 {ELSE}            {return make_else();}
@@ -93,26 +118,16 @@ ONE_LINE_COMMENT "//".*
 {PRINT}           {return make_print();}
 {PRINTLN}         {return make_println();}
 {THEN}            {return make_then();}
-{TRUE}            {return make_true();}
-{FALSE}           {return make_false();}
+{TRUE}            {return make_logic_val(yy::parser::token_type::TRUE);}
+{FALSE}           {return make_logic_val(yy::parser::token_type::FALSE);}
 {STRING_TYPE}     {return make_type(yy::parser::token_type::STRING_TYPE);}
 {CHAR_TYPE}       {return make_type(yy::parser::token_type::CHAR_TYPE);}
 {INT_TYPE}        {return make_type(yy::parser::token_type::INT_TYPE);}
-"!"               {return make_negative();};
-"?"               {return make_input();};
-"("               {return make_op_pr();};
-")"               {return make_cl_pr();};
-"{"               {return make_op_br();};
-"}"               {return make_cl_br();};
-
-"||"              {return make_or();};
-
-"&&"              {return make_and();};
 
 {ID}              {return make_id();};
 {DIGIT1}{DIGIT}*  {return make_num();};
 {DIGIT}           {return make_num();};
-.			      {return make_err();};
+.			      {return make_err("Unknown symbol");};
 
 %{/*-----------------------------------------------------------------------*/%}
 

@@ -1,0 +1,2 @@
+Int64_t position = if true then initial + rate * 60 else 0
+-- WHY I AM LIKE THIS

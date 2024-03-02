@@ -1,0 +1,4 @@
+/* TYPES TEST */
+String var = "WHOOOOOOOOOOOO"
+Int var    = 89;
+Char var   = "I"

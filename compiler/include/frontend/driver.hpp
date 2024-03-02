@@ -74,17 +74,17 @@ class driver_t {
 
         parser::token_type yylex(parser::semantic_type* yylval, parser::location_type* loc) {
 
-            parser::token_type tt = static_cast<parser::token_type>(plex_->yylex(loc));
-            while (plex_->yylex(loc) != 0) {
-                std::cout << "CUR_LEX_TYPE: " << plex_->get_cur_lex_type() << "    LEX_VAL: " << plex_->YYText() << '\n';
-                std::cout << "LOCATION:\n";
+            parser::token_type tt = {};
+            while (tt = static_cast<parser::token_type>(plex_->yylex(loc))) {
+                if (tt == yy::parser::token_type::ERR) {
+                    error(*loc, plex_->get_token_extra_dat());
+                    continue;
+                }
+                std::cout << "| CUR_LEX_TYPE: " << plex_->get_cur_lex_type() << "\n";
+                std::cout << "| LEX_VAL: " << "<\033[32m" << plex_->YYText() << "\033[0m>" << "\n\n";
             }
-            if (tt == yy::parser::token_type::NUMBER) {
-                yylval->as<int>() = std::stoi(plex_->YYText());
-            }
-            else if (tt == yy::parser::token_type::ID) {
-                yylval->build<std::string>(plex_->YYText());
-            }
+            print_errors();
+
             return tt;
         }
 
@@ -94,12 +94,12 @@ class driver_t {
             return !res;
         }
 
-        void error(const class location& loc, const std::string& msg) {
+        void error(const location& loc, const std::string& msg) {
             compil_err_flag = true;
 
-            yy::parser::location_type my_loc = plex_->get_location();
-            const frontend::error_t my_error {msg, prog_data_[my_loc.begin.line -1],
-                                                  plex_->get_cur_lex_type(), my_loc};
+            // yy::parser::location_type my_loc = plex_->get_location();
+            const frontend::error_t my_error {msg, prog_data_[loc.begin.line - 1],
+                                                  plex_->get_cur_lex_type(), loc};
             compil_err.push_back(std::move(my_error));
 
         }

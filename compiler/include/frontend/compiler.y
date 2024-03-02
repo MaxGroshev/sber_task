@@ -82,6 +82,8 @@ parser::token_type yylex(parser::semantic_type* yylval, parser::location_type* l
     OP_BR    "{"
     CL_BR    "}"
 
+    STRING
+
     AND      "&&"
     OR       "||"
     ERR
