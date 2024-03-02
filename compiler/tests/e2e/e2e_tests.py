@@ -138,4 +138,4 @@ def run_test_data(name_of_testing_prog, test_dat):
 # -----------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    run_test_data("./paracl", test_data)
+    run_test_data("./compiler", test_data)

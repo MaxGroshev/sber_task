@@ -1,6 +1,6 @@
 set(SRCS
-        error_handl.cpp
-        driver.cpp
+    error_handl.cpp
+    driver.cpp
 )
 
 add_library(frontend ${SRCS})

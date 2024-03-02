@@ -10,17 +10,6 @@
 
 %code requires {
 
-#include "tokens/scope.hpp"
-#include "inode/inode.hpp"
-#include "tokens/operators.hpp"
-#include "tokens/comparator.hpp"
-#include "tokens/conjunction.hpp"
-#include "tokens/utils.hpp"
-#include "tokens/io.hpp"
-
-using namespace paracl;
-using namespace backend;
-
 namespace yy { class driver_t; }
 
 }
@@ -29,14 +18,6 @@ namespace yy { class driver_t; }
 
 #include "frontend/driver.hpp"
 #include <iostream>
-
-
-using namespace paracl;
-using namespace backend;
-
-
-scope_t* current_scope = new scope_t(nullptr);
-
 namespace yy {
 
 parser::token_type yylex(parser::semantic_type* yylval, parser::location_type* loc, driver_t* driver);

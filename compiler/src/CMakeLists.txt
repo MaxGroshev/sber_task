@@ -1,6 +1,4 @@
 set(SRC_LIST
-        tokens
-        inode
         frontend
 )
 

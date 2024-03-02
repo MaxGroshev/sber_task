@@ -1,2 +1,9 @@
-/* BRACKET TEST */
- {} () {}
+/* FAILED LEXER TEST */
+
+if (x < 5)
+    print `;
+else if (x > 12) {
+    x = 8 * (23 - 4);
+}
+
+./;

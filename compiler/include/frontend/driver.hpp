@@ -8,8 +8,6 @@
 #include <FlexLexer.h>
 #include "lexer.hpp"
 
-#include "tokens/cond_operators.hpp"
-#include "inode/inode.hpp"
 #include "error_hadl.hpp"
 #include "grammar.tab.hpp"
 
@@ -28,7 +26,7 @@ class driver_config_t {
             f_input(get_f_input(argc, argv)), input(f_input) {
 
             if (!input.good()) {
-                throw ("ParaCl: No such file or directory: " + std::string(argv[1]));
+                throw ("COMPILER: No such file or directory: " + std::string(argv[1]));
             }
         }
 
@@ -81,7 +79,7 @@ class driver_t {
                     continue;
                 }
                 std::cout << "| CUR_LEX_TYPE: " << plex_->get_cur_lex_type() << "\n";
-                std::cout << "| LEX_VAL: " << "<\033[32m" << plex_->YYText() << "\033[0m>" << "\n\n";
+                std::cout << "| LEX_VAL: " << GREEN_C << plex_->YYText() << RESET_C << "\n\n";
             }
             print_errors();
 
